@@ -1,0 +1,184 @@
+\documentclass{article}
+\usepackage{indentfirst,latexsym,bm}
+\usepackage{graphics}
+\usepackage{color}
+%\usepackage{CJK}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{mathrsfs} %For \mathscr
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage[top=0.5in, bottom=.5in, left=0.5in, right=0.5in]{geometry}
+\setlength{\parindent}{0em}
+
+\def\dsst{\displaystyle}
+
+\begin{document}
+\pagestyle{empty}
+\title{Bandit Machine 2 Play Posterior Probability Calculation}
+\author{Duke University}
+\maketitle 
+
+\subsection*{Play Machine 1 Twice and Get 1 Win then 1 Loss}
+
+In this example, we have \verb|data = data.frame(machine = c(1L, 1L), outcome = c("W", "L"))|. We can calculate the posterior probabilities \textbf{step-by-step} as in the video mentioned.
+
+\subsubsection*{Step 1: Machine 1 gets the 1st win}
+
+We build the probability tree as follows:
+% Set the overall layout of the tree
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+%\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=2cm]
+
+% Define styles for bags and leafs
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+% The sloped option gives rotated edge labels. Personally
+% I find sloped labels a bit difficult to read. Remove the sloped options
+% to get horizontal labels. 
+%\begin{tikzpicture}[grow=right] %sloped]
+
+\begin{center}
+\begin{tikzpicture}[grow=right] %sloped]
+\node[bag] {$\mathbb{P}(M_1\text{ is good})$  $\dsst \frac{1}{2}$}
+child {
+	%node[bag] {Bag 2 $4W, 5B$}        
+	%child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{1st loss} ~|~ M_1\text{ is good})=\dsst \frac{1}{2}$}] {}
+		edge from parent
+		%node[above] {$W$}
+		%node[below]  {$\frac{4}{9}$}
+	}
+child {
+	node[end, label=right:
+	{$\mathbb{P}(\text{1st win}~|~ M_1\text{ is good}) = \dsst \frac{1}{2}$}] {}
+	edge from parent
+	%node[above] {$\dsst \frac{1}{2}$}
+	%node[below]  {$\frac{5}{9}$}
+};
+\end{tikzpicture}
+\vspace{1cm}
+
+\begin{tikzpicture}[grow=right, sloped]
+\node[bag]{$\mathbb{P}(M_1\text{ is bad})$ $\dsst \frac{1}{2}$}
+child {
+	node[end, label = right:
+	{$\mathbb{P}(\text{1st loss}~|~M_1\text{ is bad}) = \dsst \frac{2}{3}$ }]{}
+	edge from parent
+	%node[above]{test}
+}
+child{
+	node[end, label = right:
+	{$\mathbb{P}(\text{1st win}~|~M_1\text{ is bad}) = \dsst \frac{1}{3}$}]{}
+	edge from parent
+};
+\end{tikzpicture}
+\end{center}
+
+From the tree, we can calculate the following \textbf{posterior probabilities}:
+\begin{align*}
+\mathbb{P}(M_1\text{ is good}~|~\text{1st win}) & = \dsst \frac{\mathbb{P}(\text{1st win}~|~M_1\text{ is good})\mathbb{P}(M_1\text{ is good})}{\mathbb{P}(\text{1st win}~|~M_1\text{ is good})\mathbb{P}(M_1\text{ is good}) + \mathbb{P}(\text{1st win}~|~M_1\text{ is bad})\mathbb{P}(M_1\text{ is bad})}\\
+&  \\
+& = \frac{\dsst \frac{1}{2}\times \frac{1}{2}}{\dsst \frac{1}{2}\times\frac{1}{2}+\frac{1}{3}\times\frac{1}{2}} \\
+&  \\
+& = \frac{3}{5} = 0.6
+\end{align*}
+
+Since $M_1$ is bad after we have observed the 1st win is the complement of $M_1$ is good after we have observed the 1st win, we can simply get
+$$ \mathbb{P}(M_1\text{ is bad}~|~\text{1st win}) = 1-\mathbb{P}(M_1\text{ is good}~|~ \text{1st win}) = \frac{2}{5} = 0.4 $$
+\newpage
+
+The above resuults match what we can get from running the following codes in RStudio Console:\\ %\enquote{W}
+
+\verb|data = data.frame(machine = 1L, outcome = "W")|\\
+\verb|bandit_posterior(data)|\\
+
+The results are shown in the \verb|.Rmd| file:
+\begin{lstlisting}
+# #  m1_good   m2_good
+# #      0.6       0.4
+\end{lstlisting}
+
+\subsubsection*{Step 2: Machine 1 gets the 2nd loss}
+
+Now we need to use the posterior probabilities from the previous step as our new prior, and follow the probability tree:
+
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+\begin{center}
+	\begin{tikzpicture}[grow=right]
+	\node[bag] {$\mathbb{P}(M_1\text{ is good} ~|~ \text{1st win})$  $\dsst \frac{3}{5} = 0.6$}
+	child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{2nd loss} ~|~ M_1\text{ is good, 1st win})=\dsst \frac{1}{2}$}] {}
+		edge from parent
+	}
+	child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{2nd win}~|~ M_1\text{ is good, 1st win}) = \dsst \frac{1}{2}$}] {}
+		edge from parent
+	};
+	\end{tikzpicture}
+	\vspace{1cm}
+	
+	\begin{tikzpicture}[grow=right, sloped]
+	\node[bag]{$\mathbb{P}(M_1\text{ is bad} ~|~\text{1st win})$ $\dsst \frac{2}{5} = 0.4$}
+	child {
+		node[end, label = right:
+		{$\mathbb{P}(\text{2nd loss}~|~M_1\text{ is bad, 1st win}) = \dsst \frac{2}{3}$ }]{}
+		edge from parent
+	}
+	child{
+		node[end, label = right:
+		{$\mathbb{P}(\text{2nd win}~|~M_1\text{ is bad, 1st win}) = \dsst \frac{1}{3}$}]{}
+		edge from parent
+	};
+	\end{tikzpicture}
+\end{center}
+
+As you can see, we can just ignore the branches indicating the 2nd play is win and just focus on those that gives win for the 2nd play. To update the new posterior probability, we use Bayes' Rule again:
+\begin{align*}
+& \mathbb{P}(M_1\text{ is good}~|~\text{1st win, 2nd loss})\\
+& \\
+& = \dsst \frac{\mathbb{P}(\text{2nd loss}~|~M_1\text{ is good, 1st win})\mathbb{P}(M_1\text{ is good} ~|~\text{1st win})}{\mathbb{P}(\text{2nd loss}~|~M_1\text{ is good, 1st win})\mathbb{P}(M_1\text{ is good} ~|~\text{1st win}) + \mathbb{P}(\text{2nd loss}~|~M_1\text{ is bad, 1st win})\mathbb{P}(M_1\text{ is bad} ~|~\text{1st win})}\\
+&  \\
+& = \frac{\dsst \frac{1}{2}\times \frac{3}{5}}{\dsst \frac{1}{2}\times\frac{3}{5}+\frac{2}{3}\times\frac{2}{5}} \\
+&  \\
+& = \frac{9}{17} \approx 0.5294118
+\end{align*}
+
+And of course, the posterior probability that Machine 1 is bad after 2 plays with 1st win then 2nd play a loss is the complement of the above posterior probability, which is
+$$ \mathbb{P}(M_1\text{ is bad}~|~\text{1st win, 2nd loss}) = 1-\mathbb{P}(M_1\text{ is good}~|~\text{1st win, 2nd loss}) = 1 - 0.5294118 = 0.4705882 $$
+\end{document}
+ %edge from parent 
+%node[above] {$W$}
+%node[below]  {$\frac{4}{7}$}
+%   }
+%   child {
+       node[bag] {Bag 2 $3W, 6B$}        
+child {
+	node[end, label=right:
+	{$P(B_1\cap W_2)=\frac{3}{7}\cdot\frac{3}{9}$}] {}
+	edge from parent
+	node[above] {$B$}
+	node[below]  {$\frac{3}{9}$}
+}
+child {
+	node[end, label=right:
+	{$P(B_1\cap B_2)=\frac{3}{7}\cdot\frac{6}{9}$}] {}
+	edge from parent
+	node[above] {$W$}
+	node[below]  {$\frac{6}{9}$}
+};
+%edge from parent         
+%node[above] {$B$}
+%node[below]  {$\frac{3}{7}$}
+%   };

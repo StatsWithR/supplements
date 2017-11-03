@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage{indentfirst,latexsym,bm}
+\usepackage{graphics}
+\usepackage{color}
+%\usepackage{CJK}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{mathrsfs} %For \mathscr
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage[top=0.8in, bottom=.8in, left=0.5in, right=0.5in]{geometry}
+\setlength{\parindent}{1em}
+
+\def\dsst{\displaystyle}
+\pagenumbering{arabic}
+\begin{document}
+%\pagestyle{empty}
+\title{Week 2 Non Conjugate Example (Optional)}
+\author{Duke University}
+\date{}
+\maketitle 
+
+%\section*{}
+
+
+
+In this file, we will solve our usual coin toss problem, but to use a prior distribution that does not pair with the Binomial distribution to for conjugacy. Since there is no conjugacy we can apply, we will need to carry out integral calculations.
+
+\subsection*{Problem}
+\begin{displayquote}
+	You have a coin with unknown chance $p$ of getting heads. Suppose you believe the chance of getting heads is more likely that the chance of getting tails. So you place a prior distribution $\dsst \pi(p) = \frac{2}{3}(1+p),\ 0\leq p \leq 1$. You toss the coin 3 times and get 1 head. What would the posterior distribution of $p$ be based on the results of the 3 coin tosses? 
+\end{displayquote}
+
+\subsection*{Prior}
+
+The prior distribution we use here is
+$$ \pi(p) = \frac{2}{3}(1+p),\qquad 0\leq p \leq 1. $$
+
+This is a function I randomly pick. The graph of the function can be shown below, with the red dash-line indicating the mean of $p$. This is an increasing straight line, concentrating more mass in the region when $p$ is closer to 1 than $p$ is to 0. So this reflects our belief that there is higher chance to get heads than tails.
+\begin{figure}[tbph]
+	\centering
+	\includegraphics[width=0.4\linewidth]{C:/Files/Jobs/DukeCourseraMentor/Week2/NonConjugateExample1}
+	%\caption{}
+	%\label{fig:nonconjugateexample1}
+\end{figure}
+
+
+We can check that this function satisfies the properties of probability distributions:
+\begin{itemize}
+	\item $\pi(p)\geq 0$ for any $p$ in the defined range ($0\leq p \leq 1$),
+	
+	\item $\dsst \int_0^1 \pi(p)\, dp = \int_0^1 \frac{2}{3}(1+p)\, dp = 1$.
+\end{itemize}
+
+So we can use this function as our prior distribution of $p$.
+
+\subsection*{Prior Mean}
+
+Before we carry out the Bayes' Rule, let us first calculate the mean of this prior distribution and make comparison with the posterior later. \\
+
+The prior mean reflects the average of $p$, the chance of getting heads, under our belief before we have any data. The following calculation tells us the prior mean is:
+$$ \text{prior mean of $p$ }=\int_0^1 p\pi(p)\, dp = \int_0^1 p\left[\frac{2}{3}(1+p)\right]\, dp = \frac{5}{9}\approx 0.5555556 > 0.5.$$
+
+\subsection*{Use Bayes' Rule to Update}
+
+The prior distribution $\dsst \pi(p) = \frac{2}{3}(1+p)$ does not belong to the Beta distribution family since it does not carry a form of $p^{\text{some power}}(1-p)^{\text{another power}}$. To update and obtain the posterior distribution of $p$ after observing 1 head in 3 tosses, we have to use the formula of Bayes' Rule:
+
+\begin{align*}
+\pi^*(p~|~\text{1 head in 3 tosses}) = & \frac{\mathbb{P}(\text{1 head in 3 tosses}~|~p)\times \pi(p)}{\dsst \int_{0}^{1}\mathbb{P}(\text{1 head in 3 tosses}~|~p)\times \pi(p)\, dp} = \frac{\dsst \left[\binom{3}{1}p^1(1-p)^2\right]\left[\frac{2}{3}(1+p)\right]}{\dsst \int_0^1  \left[\binom{3}{1}p^1(1-p)^2\right]\left[\frac{2}{3}(1+p)\right]\, dp} \\
+& \\
+= & \frac{2(p-p^2-p^3+p^4)}{\dsst \int_0^1 2(p-p^2-p^3+p^4)\, dp} = \frac{60}{7}(p-p^2-p^3+p^4).
+\end{align*}
+
+So the posterior distribution of $p$ in this problem has become 
+$$ \pi^*(p~|~\text{data}) = \frac{60}{7}(p-p^2-p^3+p^4),\qquad 0\leq p\leq 1. $$
+with its graph shown below, with the dash-line indicating the posterior mean of $p$.
+\begin{figure}[tbph]
+	\centering
+	\includegraphics[width=0.4\linewidth]{C:/Files/Jobs/DukeCourseraMentor/Week2/NonConjugateExample2}
+	%\caption{}
+	\label{fig:nonconjugateexample2}
+\end{figure}
+
+\subsection*{Posterior Mean}
+
+We can see that the posterior distribution has dramatically move its weight away from 1, after getting the data. We can calculate the mean of the posterior distribution and compare:
+$$ \text{posterior mean of $p$ }=\int_0^1 p\pi^*(p~|~\text{data})\, dp = \int_0^1 p\left[\frac{60}{7}(p-p^2-p^3+p^4)\right]\, dp = \frac{3}{7} \approx 0.4285714 < 0.5.$$ 
+
+The data that we only have 1 head out of 3 tosses have shifted our belief of $p$ from getting closer to 1 to getting closer to 0.
+
+
+
+
+
+
+
+\end{document}

@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage{indentfirst,latexsym,bm}
+\usepackage{graphics}
+\usepackage{color}
+%\usepackage{CJK}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{mathrsfs} %For \mathscr
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage[top=0.8in, bottom=.8in, left=0.5in, right=0.5in]{geometry}
+\setlength{\parindent}{1em}
+
+\def\dsst{\displaystyle}
+\pagenumbering{arabic}
+\begin{document}
+%\pagestyle{empty}
+\title{Week 3 Summary}
+\author{Duke University}
+\date{}
+\maketitle 
+
+\section*{Summary}
+
+Since this week contains a lot of information, I will first go over the big picture of what we need to know in this week. Although we have presented many examples, including hypothesis tests, credible intervals, point estimates for parameters and prior choice discussions under different circumstances, we do not require students to master every single piece of the calculations. In fact, you will see in Week 3 Lab that you can obtain most of the results from the function $\verb|bayes_inference|$. We instead expect students to understand the main concepts, how to interpret the results from Bayes inference, and how different priors may influence the results.\\
+
+If your goal is merely to pass the quizzes, this summary would be very likely to help you survive. However, if you would like to understand some more discussions about the videos, I suggest you keep on reading the file \textbf{Lecture Video Explanations}.
+
+\begin{itemize}
+	\item \textbf{Loss Functions:} Videos \textbf{Losses and Decision Making} and \textbf{Working with Loss Functions} talk about the best estimators correspond to the 3 loss functions, linear, squared and 0/1 losses. I am not going to repeat them here. However, students are required to know how to find the best estimator according to the given distribution of the variable and the given loss function.
+	
+	\item \textbf{Expected Loss:} In the video \textbf{Minimizing Expected Loss for Hypothesis Testing}, we provide one method to compare 2 hypotheses: to calculate the 2 expected losses under each hypothesis to decide which hypothesis we should take. Here, the expected loss $\mathbb{E}(L(d))$ is in fact the \textbf{conditional} expected loss $\mathbb{E}(L(d)~|~\text{data})$, which is conditioned on the \textbf{given data we have observed}.\\
+	
+	Before we go into the detail of the calculation, let us be clear of the meaning of $\mathbb{P}(H_1~|~\text{data})$. Here, please understand this term as \textbf{given data, the probability that hypothesis $H_1$ will happen}.\\ 
+	
+	We summarize the calculation of expected loss. Let us denote a decision $d$ and its corresponding loss function $L(d)$. Suppose \textbf{$d$ supports $H_1$}. Then the definition of $L(d)$ can be written as:
+	$$ L(d) = \left\{\begin{array}{ll}
+	0, & \text{$H_1$ happens, meaning $d$ is right}\\
+	w_1, & \text{$H_2$ happens, menaing $d$ is wrong}.
+	\end{array}\right.$$
+	
+	Then according to the definition of expected value, $\dsst \mathbb{E}(f(X)) = \sum_{\text{all values of $X$}} f(\text{the value of $X$})\times \mathbb{P}(\text{$X$ takes this value})$, we can calculate $\mathbb{E}(L(d)~|~\text{data})$ as follows:
+	
+	$$\mathbb{E}(L(d)~|~\text{data}) =  L(\text{$H_1$ happens})\times \mathbb{P}(\text{$H_1$ does happen}~|~\text{data}) + L(\text{$H_2$ happens}) \times \mathbb{P}(\text{$H_2$ does happen}~|~\text{data})
+	$$
+	
+	Let us come back to the example in the video. We have two competing hypothesis:
+	$$ H_1:\quad \text{Patient does not have HIV}, \qquad \text{vs}\qquad H_2:\quad \text{Patient does have HIV} $$
+	If we let $d_1$ to be
+	$$ d_1:\qquad \text{Decide that patient does not have HIV, meaning $d_1$ supports $H_1$}$$
+	When we say $d_1$ is right, it is equivalent to, $H_1$ happens. When $d_1$ is wrong, means $H_2$ happens. Therefore, we have
+	$$ E(L(d_1)) = (0)\times (0.88) + (1000) \times (0.12) = (L(\text{$H_1$ happens}))(\mathbb{P}(H_1~|~\text{data})) + (L(\text{$H_2$ happens}))(\mathbb{P}(H_2~|~\text{data})) $$
+	
+	\item \textbf{Bayes Factor: }We introduce this concept in the video \textbf{Posterior Probabilities of Hypothesis and Bayes Factors}. Here we need to bring in the \textbf{odd} concept. Just like we usually say, there is a ``50-50 chance" that the coin toss will give a head, \textbf{odd} is just the ratio of the probabilities between 2 events. \\
+	
+	\textbf{Prior Odd:} Ratio of the prior probabilities under 2 hypotheses. If we are interested in the case that $H_1$ over $H_2$, we calculate the odd as follow:
+	$$ \text{O}[H_1:H_2] = \frac{\mathbb{P}(H_1)}{\mathbb{P}(H_2)} $$
+	
+	\textbf{Posterior Odd:} Likewise, we can define the posterior odd $H_1$ over $H_2$ as the ratio between the posterior probabilities under the 2 hypotheses.
+	$$ \text{PO}[H_1:H_2] = \frac{\mathbb{P}(H_1~|~\text{data})}{\mathbb{P}(H_2~|~\text{data})} $$
+	
+	Using \textbf{conditional probability} that we introduced in Week 1, we derive 
+	\begin{align*} 
+	\text{posterior odd }= \text{PO}[H_1:H_2] = &  \frac{\mathbb{P}(H_1~|~\text{data})}{\mathbb{P}(H_2~|~\text{data})} = \frac{\dsst \frac{\mathbb{P}(H_1\text{ and data})}{\mathbb{P}(\text{data})}}{\dsst \frac{\mathbb{P}(H_2\text{ and data})}{\mathbb{P}(\text{data})}} = \frac{\mathbb{P}(H_1\text{ and data})}{\mathbb{P}(H_2\text{ and data})} \\
+	= & \frac{\mathbb{P}(\text{data}~|~H_1)\mathbb{P}(H_1)}{\mathbb{P}(\text{data}~|~H_2)\mathbb{P}(H_2)} = \underbrace{\frac{\mathbb{P}(\text{data}~|~H_1)}{\mathbb{P}(\text{data}~|~H_2)}}_\text{Bayes factor} \times \underbrace{\frac{\mathbb{P}(H_1)}{\mathbb{P}(H_2)}}_\text{prior odd}
+	\end{align*}
+	
+	To summarize, we can calculate Bayes factor of $H_1$ over $H_2$ using:
+	$$ \text{Bayes factor } = \text{BF}[H_1:H_2] = \frac{\text{posterior odd}}{\text{prior odd}} = \frac{\text{PO}[H_1:H_2]}{\text{O}[H_1:H_2]} $$
+	or
+	$$ \text{Bayes factor } = \text{BF}[H_1:H_2] = \frac{\mathbb{P}(\text{data}~|~H_1)}{\mathbb{P}(\text{data}~|~H_2)} $$
+	
+	The 1st method tells us how Bayes factor connects prior odd and posterior odd. The 2nd method tells us that Bayes factor only depends on the likelihood of data under the 2 hypotheses. Therefore, when it is not easy to assign a good prior for the hypotheses, Bayes factor still gives us information about the \textbf{relative comparison} between the 2 hypotheses. \\
+	
+	\textbf{Note:} It is obvious that, if the Bayes factor of $H_1$ over $H_2$ is $\text{BF}[H_1:H_2]$, then the Bayes factor of $H_2$ over $H_1$ is
+	$$ \text{BF}[H_2:H_1] = \frac{1}{\text{BF}[H_1:H_2]} $$
+	
+	\textbf{Note:} $\text{BF}[H_1:H_2]$ is interpreted as the evidence to support $H_1$ over $H_2$, or the evidence against $H_2$. Bayes factor will never give us the \textbf{absolute comparison} between the 2 hypotheses. We can only say which hypothesis is favored over another one because there is relatively stronger evidence to support this hypothesis. To interpret Bayes factor, please refer to the \textbf{Jeffreys scale} or \textbf{Kass \& Raftery scale} in the video.\\
+
+	
+	\textbf{Note:} About Bayes factor when the parameter $\theta$ in the likelihood follows a \textbf{continuous probability distribution}. In the lecture video, there is a typo about this part. The formula for Bayes factor should be: 
+	$$ \text{Bayes factor } = \frac{\dsst \mathbb{P}(\text{data}~|~H_1)}{\dsst \mathbb{P}(\text{data}~|~H_2)}  = \frac{\dsst \int \mathbb{P}(\text{data, }\theta~|~H_1)\, d\theta }{\dsst \int \mathbb{P}(\text{data, } \theta~|~H_2)\, d\theta}= \frac{\dsst \int \mathbb{P}(\text{data}~|~\theta, H_1)\pi(\theta~|~H_1)\, d\theta}{\dsst \int \mathbb{P}(\text{data}~|~\theta, H_2)\pi(\theta~|~H_2)\, d\theta} $$
+	(It should be $\mathbb{P}(\text{data },\theta~|~H_1)$ instead of $\mathbb{P}(\text{data}~|~\theta, H_1)$)
+	
+	\item \textbf{Examples of Hypothesis Tests Using Bayes Factors and Prior Choice:} In the rest of the videos, we explore how to use Bayes factors to compare hypotheses, which include:
+	\begin{itemize}
+		\item Compare 2 proportions using \textbf{Beta-Binomial conjugate family}.
+		
+		\item Compare 2 paired means using \textbf{NormalGamma-Normal conjugate family}. (I will give details of this conjugacy in the Lecture Video Explanations file.)
+		
+		\item Compare 2 independent means using \textbf{NormalGamma-Normal conjugate family}. 
+	\end{itemize}
+	
+	In particular, in the last example, we explore the effect of the ``\textbf{imaginary parameter values}", the values we use in the prior distribution of the parameters. We see how different values affect the \textbf{credible interval}, which will lead to the two paradoxes: Lindley's paradoxes and the Bartlett's paradoxes. \\
+	
+		
+	The 2 paradoxes suggest the importance of setting appropriate prior when sample size is too large, or when the ``\textbf{imaginary sample size}" is too large. 
+	\begin{itemize}
+		\item We use heavy-tailed prior as such Cauchy prior to handle the extrasensory perception.
+		
+		\item Suppose we would like to include as little information in the prior as possible, we can consider using the Jeffrey's prior, which is a limit of some distributions when the ``imaginary sample size" goes to infinity.
+		
+		\item To avoid paradoxes, we may also consider the intrinsic prior. The formula for intrinsic prior is too complicated so the video only refers it by names.
+	\end{itemize}
+	
+	\textbf{Note: }Students are required to understand what effects lead to the 2 paradoxes (which is mentioned in the video \textbf{Posterior Probability, $p$-Values and Paradoxes}). However, students do not need to worry about how to do the detailed calculation to obtain the credible intervals and the posterior probability under hypotheses. These will be handled by the $\verb|bayes_inference|$ function in the $\verb|statsr|$ package.
+	
+	\textbf{Note: }As you may guess, the credible intervals we have obtained in this week are all \textbf{equal-tailed credible intervals}.\\
+	
+\end{itemize}
+
+
+\end{document}
+
+

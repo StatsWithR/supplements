@@ -1,0 +1,364 @@
+\documentclass{article}
+\usepackage{indentfirst,latexsym,bm}
+\usepackage{graphics}
+\usepackage{color}
+%\usepackage{CJK}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{mathrsfs} %For \mathscr
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage[top=0.8in, bottom=.8in, left=0.5in, right=0.5in]{geometry}
+\setlength{\parindent}{1em}
+
+\def\dsst{\displaystyle}
+\pagenumbering{arabic}
+\begin{document}
+%\pagestyle{empty}
+\title{Week 1 Review and Posterior Probability Calculation Example}
+\author{Duke University}
+\date{}
+\maketitle 
+
+\subsection*{Review Terminology}
+
+Before we do the computation, let us review the 3 ``probabilities":
+
+\begin{align*}
+\text{Prior Probability:} & \qquad \text{The probability of the \textbf{hypothesis/assumption}. Often the hypothesis/assumeption is about some}\\
+& \qquad \text{parameters $\theta$ and therefore, we will denote this as }\mathbb{P}(\text{hypothesis})\text{ or }\mathbb{P}(\theta = \text{some value}).\\
+& \\
+\text{Likelihood:}  & \qquad \text{The probability of the \textbf{data/result} we observe given the hypothesis we make. It is denoted as }\\
+& \qquad \mathbb{P}(\text{data}~|~\text{hypothesis}) \text{ or }\mathbb{P}(\text{data}~|~\theta = \text{some value}).\\
+& \\
+\text{Posterior Probability:} & \qquad \text{The probability of the \textbf{hypothesis/assumption} we update after we have obtained the data. It is }\\
+& \qquad\text{denoted as $\mathbb{P}(\text{hypothesis}~|~\text{data})$ or $\mathbb{P}(\theta = \text{some value}~|~\text{data})$}.
+\end{align*}
+
+\subsection*{Example}
+
+In the following, we will focus on one example to see how to apply what we have learned in Week 1:
+\begin{displayquote}
+	Suppose there are two coins, an unbiased one and a biased one. The unbiased one is equally likely to get a head or a tail, while the biased coin has higher probability, 0.8, to get a head. We randomly choose a coin from the two, flip it 3 times and get 1 head and 2 tails. What is the posterior probability that the coin is biased?
+\end{displayquote}
+
+From the problem, since we have no information about the 2 coins, we will assign \textbf{equal} prior to each coin. That is
+
+$$ \mathbb{P}(\text{biased}) = \mathbb{P}(\text{unbiased}) = \frac{1}{2}. $$
+
+If we use $p$ to denote the parameter representing the probability of getting heads in the 2 coins, we can also write our prior probabilities to be
+$$ \mathbb{P}(p = 0.8) = \mathbb{P}(p = 0.5) = \frac{1}{2}. $$
+
+\textbf{Note:} Since we flip the \textbf{same} coin 3 times, the likelihood of getting heads each time is the same. So we can either calculate the posterior probability all at once, or \textbf{update} the posterior probabilities \textbf{sequentially}. However, if we switch coins during the flips, or like in the HIV example that we used ELISA as well as Western Blot for the 3 tests, the parameters involved in the likelihood in each step will change. In this case, we have to update the posterior probability sequentially.
+
+ 
+\subsection*{Method 1: View 3 Flips as One Whole Process}
+
+We will first show how to calculate the posterior probability all at once:
+
+\subsubsection*{Probability tree}
+
+We can build the probability tree as follows. We will explain how to get the likelihood of each branch in the next section.
+% Set the overall layout of the tree
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+%\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=2cm]
+
+% Define styles for bags and leafs
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+% The sloped option gives rotated edge labels. Personally
+% I find sloped labels a bit difficult to read. Remove the sloped options
+% to get horizontal labels. 
+%\begin{tikzpicture}[grow=right] %sloped]
+
+\begin{center}
+\begin{tikzpicture}[grow=right] %sloped]
+\node[bag] {$\mathbb{P}(\text{biased})$  $\dsst \frac{1}{2}$}
+child {
+	%node[bag] {Bag 2 $4W, 5B$}        
+	%child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{other situation} ~|~\text{biased}) = 1-\dsst\binom{3}{1}(0.8)^1(0.2)^2$}] {}
+		edge from parent
+		%node[above] {$W$}
+		%node[below]  {$\frac{4}{9}$}
+	}
+child {
+	node[end, label=right:
+	{$\mathbb{P}(\text{1 head and 2 tails}~|~\text{biased})=\dsst\binom{3}{1}(0.8)^1(0.2)^2$}] {}
+	edge from parent
+	%node[above] {$\dsst \frac{1}{2}$}
+	%node[below]  {$\frac{5}{9}$}
+};
+\end{tikzpicture}
+\vspace{0.1cm}
+
+\begin{tikzpicture}[grow=right, sloped]
+\node[bag]{$\mathbb{P}(\text{unbiased})$ $\dsst \frac{1}{2}$}
+child {
+	node[end, label = right:
+	{$\mathbb{P}(\text{other situation}~|~\text{unbiased}) = 1-\dsst \binom{3}{1}(0.5)^1(0.5)^2$ }]{}
+	edge from parent
+	%node[above]{test}
+}
+child{
+	node[end, label = right:
+	{$\mathbb{P}(\text{1 head and 2 tails}~|~\text{unbiased}) = \dsst \binom{3}{1}(0.5)^1(0.5)^2$}]{}
+	edge from parent
+};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Calculate likelihoods}
+
+The crucial step in Bayesian statistics is to understand how to calculate the likelihood of each situation. In this example, we do not emphasize the order of getting 1 head and 2 tails. Therefore, we should view this process as a \textbf{binomial process} (each trial is a Bernoulli trial). Therefore, suppose we assume the probability of getting a head for a general coin is $p$, then the probability ($=$\textbf{likelihood}) of getting 1 head and 2 tails given this $p$ is:
+$$ \mathbb{P}(\text{1 head and 2 tails};\text{given $p$}) = \binom{3}{1}p^1(1-p)^2. $$
+
+Here, this $p$, the probability for a general coin to get a head, is called the \textbf{parameter} of the \textbf{likelihood}, that is, the \textbf{parameter} of the \textbf{binomial probability mass function}.\\
+
+For the 2 coins we have in this example, the likelihoods are
+\begin{align*}
+\mathbb{P}(\text{1 head and 2 tails}~|~\text{biased}) & = \binom{3}{1}(0.8)^1(0.2)^2 \quad \text{since $p=0.8$ for the biased coin},\\
+& \\
+\mathbb{P}(\text{1 head and 2 tails}~|~\text{unbiased}) & = \binom{3}{1}(0.5)^1(0.5)^2 \quad \text{since $p = 0.5$ for the unbiased coin}.
+\end{align*}
+
+\subsubsection*{Calculate posterior probabilities}
+
+With the prior we assign (again, you have freedom to assign priors that you think are reasonable.) and the likelihoods we just calculated, we can turn to calculate the \textbf{posterior probability} using Bayes' Rule. Since the question only asks for the posterior probability for the coin to be biased, we omit the calculation for the coin to be unbiased. 
+\begin{align*}
+& \mathbb{P}(\text{biased}~|~\text{1 head and 2 tails}) \\
+& \\
+ = & \frac{\mathbb{P}(\text{1 head and 2 tails}~|~\text{biased})\mathbb{P}(\text{biased})}{\mathbb{P}(\text{1 head and 2 tails}~|~\text{biased})\mathbb{P}(\text{biased}) + \mathbb{P}(\text{1 head and 2 tails}~|~\text{unbiased}\mathbb{P}(\text{unbiased}))}\\
+& \\
+= & \frac{\dsst \binom{3}{1}(0.8)^1(0.2)^2\times\frac{1}{2}}{\dsst \binom{3}{1}(0.8)^1(0.2)^2\times\frac{1}{2} + \binom{3}{1}(0.5)^1(0.5)^2\times \frac{1}{2}} = \frac{32}{157} \approx 0.2038217.
+\end{align*}
+
+\subsection*{Takeaway}
+
+As you can see from the Bayes' Rule 
+$$ \mathbb{P}(\text{biased}~|~\text{1 head and 2 tails}) \propto \mathbb{P}(\text{1 head and 2 tails}~|~\text{biased})\times\mathbb{P}(\text{biased}). $$
+
+(The denominator is used to normalized the posterior probability so that it is always between 0 and 1.)\\
+ 
+We can \textbf{summarize} this as
+\begin{align*}
+	& \underbrace{\mathbb{P}(\text{hypothesis}~|~\text{data})}_\text{posterior probability of hypothesis} & \propto & & \underbrace{\mathbb{P}(\text{data}~|~\text{hypothesis})}_\text{likelihood of data} & & \times & \underbrace{\mathbb{P}(\text{hypothesis}).}_\text{prior probability of hypothesis} &
+\end{align*}
+
+\vspace{1cm}
+Another takeaway from this process is, since we only care about the situation when we get 1 head and 2 tails, we never even used any likelihoods involving ``other situation". This may reduce our workload once we are proficient with the Bayes' Rule. We do not need to draw the entire probability tree to figure out the posterior probability.
+
+\subsection*{R codes}
+
+A simple \verb|R| code can be\\
+
+\noindent \verb|> prior <- c(1/2, 1/2)| \\
+\verb|> likelihood <- c(dbinom(1, 3, 0.8), dbinom(1, 3, 0.5))   # calculate likelihoods for p=0.8 and p=0.5|\\
+\verb|> posteior <- prior * likelihood / sum(prior * likelihood)|\\
+
+The results are\\
+
+\noindent \verb|> posterior|\\
+\verb|[1] 0.2038217 0.7961783|
+
+\subsection*{Method 2: Update posterior probabilities step by step}
+
+In this method, we will show how to use updating method to get the same answer as before. Since we need to update our posteriors step by step, we need to know the \textbf{results} for every single step. However, the problem does not give us any information about which flip we get the head, and which ones we get tails.\\
+
+\textbf{Important Claim:} Here I make an argument that the order of each result on each flip will NOT change our final answer. (You may think about why this makes sense intuitively.)\\
+
+Since the order of 3 coin flip results will not change our final posterior probability, we assume the head and tails show up in the following order:
+$$ \text{1st flip: head} \qquad\quad \text{2nd flip: tail} \qquad\quad \text{3rd flip: tail}. $$
+
+Here I encourage you to try other orders and see how the posterior probabilities change during the updating process.
+
+\subsubsection*{Probability trees}
+
+\textbf{Under 1st flip:}
+
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+%\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=2cm]
+
+% Define styles for bags and leafs
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+% The sloped option gives rotated edge labels. Personally
+% I find sloped labels a bit difficult to read. Remove the sloped options
+% to get horizontal labels. 
+%\begin{tikzpicture}[grow=right] %sloped]
+
+\begin{center}
+	\begin{tikzpicture}[grow=right] %sloped]
+	\node[bag] {$\mathbb{P}(\text{biased})$  $\dsst \frac{1}{2}$}
+	child {
+		%node[bag] {Bag 2 $4W, 5B$}        
+		%child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{1st tail} ~|~\text{biased}) = 0.2$}] {}
+		edge from parent
+		%node[above] {$W$}
+		%node[below]  {$\frac{4}{9}$}
+	}
+	child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{1st head}~|~\text{biased})=0.8$}] {}
+		edge from parent
+		%node[above] {$\dsst \frac{1}{2}$}
+		%node[below]  {$\frac{5}{9}$}
+	};
+	\end{tikzpicture}
+	\vspace{1cm}
+	
+	\begin{tikzpicture}[grow=right, sloped]
+	\node[bag]{$\mathbb{P}(\text{unbiased})$ $\dsst \frac{1}{2}$}
+	child {
+		node[end, label = right:
+		{$\mathbb{P}(\text{1st tail}~|~\text{unbiased}) = 0.5$ }]{}
+		edge from parent
+		%node[above]{test}
+	}
+	child{
+		node[end, label = right:
+		{$\mathbb{P}(\text{1st head}~|~\text{unbiased}) = 0.5$}]{}
+		edge from parent
+	};
+	\end{tikzpicture}
+\end{center}
+
+We update the posterior probabilities after the 1st flip using Bayes' Rule:
+\begin{align*}
+& \mathbb{P}(\text{biased}) \\
+& \\
+= & \frac{\mathbb{P}(\text{1st head}~|~\text{biased})\mathbb{P}(\text{biased})}{\mathbb{P}(\text{1st head}~|~\text{biased})\mathbb{P}(\text{biased}) + \mathbb{P}(\text{1st head}~|~\text{unbiased})\mathbb{P}\text{unbiased}}\\
+& \\
+= & \frac{\dsst (0.8)\times \frac{1}{2}}{\dsst (0.8)\times \frac{1}{2}+(0.5)\times \frac{1}{2}} = \frac{8}{13} \approx 0.6153846.
+\end{align*}
+
+Therefore, 
+$$ \mathbb{P}(\text{unbiased}~|~\text{1st head}) = 1-\mathbb{P}(\text{biased}~|~\text{1st head}) = 1 - 0.6153846 = 0.3846154. $$
+
+As we can see, with just 1 head, we tend to believe the coin is biased (with probability $0.6153846$) instead of unbiased. But will this always the case? We will see when we update the posterior probabilities after we have more information.\\
+
+%\newpage
+
+\textbf{Under 2nd flip:}\\
+
+Now we will use the previous posterior probabilities as our new prior probabilities to plug in the probability tree:
+
+
+
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+
+\begin{center}
+	\begin{tikzpicture}[grow=right]
+	\node[bag] {$\mathbb{P}(\text{biased} ~|~ \text{1st head})$  $\dsst \frac{8}{13}$}
+	child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{2nd tail} ~|~\text{biased, 1st head})= 0.2$}] {}
+		edge from parent
+	}
+	child {
+		node[end, label=right:
+		{$\mathbb{P}(\text{2nd head}~|~ \text{biased, 1st head}) = 0.8$}] {}
+		edge from parent
+	};
+	\end{tikzpicture}
+	\vspace{0.1cm}
+	
+	\begin{tikzpicture}[grow=right, sloped]
+	\node[bag]{$\mathbb{P}(\text{unbiased} ~|~\text{1st head})$ $\dsst \frac{5}{13}$}
+	child {
+		node[end, label = right:
+		{$\mathbb{P}(\text{2nd tail}~|~\text{unbiased, 1st head}) =0.5$ }]{}
+		edge from parent
+	}
+	child{
+		node[end, label = right:
+		{$\mathbb{P}(\text{2nd head}~|~\text{unbiased, 1st head}) =0.5$}]{}
+		edge from parent
+	};
+	\end{tikzpicture}
+\end{center}
+
+To update the posterior probabilities after the 2nd flip, we have
+\begin{align*}
+& \mathbb{P}(\text{biased}~|~\text{1st head, 2nd tail})\\
+& \\
+= & \frac{\mathbb{P}(\text{2nd tail}~|~\text{biased, 1st head})\mathbb{P}(\text{biased}~|~\text{1st head})}{\mathbb{P}(\text{2nd tail}~|~\text{biased, 1st head})\mathbb{P}(\text{biased}~|~\text{1st head}) + \mathbb{P}(\text{2nd tail}~|~\text{unbiased, 1st head})\mathbb{P}(\text{unbiased}~|~\text{1st head})}\\
+& \\
+= & \frac{\dsst (0.2)\times\frac{8}{13}}{\dsst (0.2)\times \frac{8}{13} + (0.5)\times \frac{5}{13}} = \frac{16}{41} \approx 0.3902439,\\
+& \\
+& \mathbb{P}(\text{unbiased}~|~\text{1st head, 2nd tail}) = 1-\mathbb{P}(\text{biased}~|~\text{1st head, 2nd tail}) = 1-0.3902439 = 0.6097561.
+\end{align*}
+
+As we can see, after the 2nd flip, the posterior probability to believe that the coin is biased towards head drop dramatically to about 0.39. This is how the new data helps us to correct our previous ``belief".\\
+
+\textbf{Note:} If the above calculation seems complicated to you, since we compute the probabilities conditioning on 2 flips, you may also simplify the notation to the following, assuming you have already used the posterior probability after the 1st flip to start with:
+\begin{align*}
+& \mathbb{P}(\text{biased}~|~\text{2nd tail})\\
+& \\
+& = \dsst \frac{\mathbb{P}(\text{2nd tail}~|~\text{biased})\mathbb{P}(\text{biased})}{\mathbb{P}(\text{2nd tail}~|~\text{biased})\mathbb{P}(\text{biased}) + \mathbb{P}(\text{2nd tail}~|~\text{unbiased})\mathbb{P}(\text{unbiased})}\\
+&  \\
+& = \frac{\dsst (0.2)\times \frac{8}{13}}{\dsst (0.2)\times\frac{8}{13}+(0.5)\times\frac{5}{13}} = \frac{16}{41} \approx 0.3902439. \\
+\end{align*}
+
+\textbf{Under 3rd flip:}\\
+
+Now you may be more familiar with the process of updating. We just show directly the calculation process to update the posterior probabilities after the 3rd flip (I use $H$ to represent ``head" and $T$ to represent ``tail"):
+\begin{align*}
+& \mathbb{P}(\text{biased}~|~\text{1st H, 2nd T, 3rd T}) \\
+& \\
+= & \frac{\mathbb{P}(\text{3rd T}~|~\text{biased, 1st H, 2nd T})\mathbb{P}(\text{biased}~|~\text{1st H, 2nd T})}{\mathbb{P}(\text{3rd T}~|~\text{biased, 1st H, 2nd T})\mathbb{P}(\text{biased}~|~\text{1st H, 2nd T}) + \mathbb{P}(\text{3rd T}~|~\text{unbiased, 1st H, 2nd T})\mathbb{P}(\text{unbiased}~|~\text{1st H, 2nd T})} \\
+& \\
+= & \frac{\dsst (0.2)\times \frac{16}{41}}{\dsst (0.2)\times \frac{16}{41} + (0.5)\times \frac{25}{41}} = \frac{32}{157} \approx 0.2038217.\\
+\end{align*}
+
+This is exactly the same result as what we got using Method 1! 
+
+\subsection*{R Codes}
+
+We can use the following \verb|R| codes to record all the posterior probabilities we have found during each step.\\
+
+\noindent \verb|> prior <- c(0.5, 0.5)|\\
+\verb|> # Initialize likelihood as a dataframe for both head and tail|\\
+\verb|> likelihood <- data.frame(H = c(0.8, 0.5), T= c(0.2, 0.5))|\\
+\verb|> # Initialize an empty dataframe to store all the posterior probabilities|\\
+\verb|> postProb <- data.frame("biased" = double(), "unbiased" = double())|\\
+
+Then we calculate the \verb|posterior| probability and update it as our new \verb|prior|. You may rewrite the codes as a \verb|for loop| in \verb|R|.\\
+
+\noindent \verb|> # After 1st flip we get H:|\\
+\verb|> posterior <- prior * likelihood$H / sum(prior * likelihood$H)|\\
+\verb|> # Store this into the dataframe `postProb` and update prior|\\
+\verb|> postProb[1, ] <- posterior|\\
+\verb|> prior <- posterior|\\
+
+\noindent \verb|> # Update the 2nd and 3rd flip:|\\
+\verb|> posterior <- prior * likelihood$T / sum(prior * likelihood$T)|\\
+\verb|> postProb[2, ] <- posterior|\\
+\verb|> prior <- posterior|\\
+\verb|> posterior <- prior * likelihood$T / sum(prior * likelihood$T)|\\
+\verb|> postProb[3, ] <- posterior|\\
+
+We can print all the posterior probabilities generated after every step:
+\begin{lstlisting}
+> postProb
+     biased  unbiased
+1 0.6153846 0.3846154
+2 0.3902439 0.6097561
+3 0.2038217 0.7961783
+\end{lstlisting}
+
+
+
+
+\end{document}
