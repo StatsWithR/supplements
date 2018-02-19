@@ -257,7 +257,7 @@ cdf_neg1
 
 Similarly, the probability of $X$ falling **below** 1, which is given mathematically by
 
-$$ F(1) = P(-\infty < X\leq 1) = \int_{-infty}^1 \textsf{N}(0, 1^2)\, dt, $$
+$$ F(1) = P(-\infty < X\leq 1) = \int_{-\infty}^1 \textsf{N}(0, 1^2)\, dt, $$
 can be obtained by
 ```{r cdf-normal2}
 cdf_pos1 = pnorm(1, mean = 0, sd = 1, lower.tail = TRUE)
@@ -316,7 +316,7 @@ $\theta$: scale
 | Gamma $\textsf{Gamma}(\alpha, \beta)$ | $\displaystyle \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha - 1}e^{-\beta x}$ | $\displaystyle \frac{\alpha}{\beta}$ | $\displaystyle \frac{\alpha}{\beta^2}$ | $\alpha = k$: shape \
 $\beta = 1/\theta$: rate |
 
-#### Remark
+### Remark
 
 1. \textcolor{blue}{Medians} and \textcolor{blue}{modes} are important features of distributions. We do not provide the values here, since they are not used as often as means and variances / standard deviations. However, we provide Wikipedia links of each distribution in **Resources** section in this course, which have listed detailed information for each distribution.
 
@@ -344,7 +344,7 @@ gamma(4)
 ```
 
 
-#### R Functions for Distributions
+### R Functions for Distributions
 
 We also list here the R functions we can use for these distributions. 
 
