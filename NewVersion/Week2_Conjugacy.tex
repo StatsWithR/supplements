@@ -1,0 +1,208 @@
+\documentclass{article}
+\usepackage{indentfirst,latexsym,bm}
+\usepackage{graphics}
+\usepackage{color}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{mathrsfs} %For \mathscr
+\usepackage[latin1]{inputenc}
+\usepackage[top=0.8in, bottom=.8in, left=0.5in, right=0.5in]{geometry}
+\setlength{\parindent}{1em}
+
+\def\dsst{\displaystyle}
+\pagenumbering{arabic}
+\begin{document}
+\title{Week 2 Derivation of Conjugacy (Optional)}
+\author{Lizzy Huang\\  Duke University}
+\date{}
+\maketitle 
+
+In this file, we will explore further why the conjugate families we mentioned in the course work. And we will also discuss briefly the updating the prior distribution to the posterior distribution of the parameter affects the effective sample size.\\
+
+To derive conjugacy, we will apply the Bayes' Rule
+$$ X \text{ discrete:}\qquad p(\theta ~|~X) = \frac{P(X~|~\theta)\times p(\theta)}{\dsst \int P(X~|~\theta)\times p(\theta)\, d\theta} \propto P(X~|~\theta)\times p(\theta) $$
+$$ X \text{ continuous:}\qquad p(\theta ~|~x) = \frac{p(x~|~\theta)\times p(\theta)}{\dsst \int p(x~|~\theta)\times p(\theta)\, d\theta} \propto p(x~|~\theta)\times p(\theta) $$
+
+\section{Beta-Binomial Conjugacy}
+
+\subsection{Definitions}
+\begin{itemize}
+	\item Beta distribution: $\pi(p) = \dsst \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}p^{\alpha-1}(1-p)^{\beta-1}$. Here $\alpha$ and $\beta$ are the hyperparameters.
+	
+	\item Binomial distribution: $\mathbb{P}(X=k~|~p) =\dsst \binom{n}{k}p^k(1-p)^{n-k}$
+\end{itemize}
+
+Using Bayes' Rule, we get
+$$ \pi(p~|~X=k) = \frac{\dsst \left[\binom{n}{k}p^k(1-p)^{n-k}\right]\times \left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}p^{\alpha-1}(1-p)^{\beta-1}\right]}{\dsst \int_0^1  \left[\binom{n}{k}p^k(1-p)^{n-k}\right]\times \left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}p^{\alpha-1}(1-p)^{\beta-1}\right]\, dp} $$
+
+The right-hand side is extremely complicated, especially the calculation of the denominator. Are we going to actually calculate this?\\
+
+Of course the answer is ``No". What we will use instead is the ``proportional to" part of Bayes' Rule. Observing that the denominator of the right-hand side, $\dsst \binom{n}{k}$, and $\dsst \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}$ are just some numbers which will scale $\pi(p~|~X=k)$ well so that the total area under the curve of $\pi(p~|~X=k)$ is always 1, we can first ignore these constants and see what form of $\pi(p~|~X=k)$ we will get.\\
+
+\textbf{Note:} As a probability distribution, one property is to guarantee that the total area under the curve is always 1. This corresponds to the fact that probability will never exceed 1.\\
+ 
+Using ``proportional to", we rewrite the calculation into
+$$ \pi(p~|~X=k) \propto \left[p^k(1-p)^{n-k}\right]\times \left[p^{\alpha-1}(1-p)^{\beta-1}\right] = p^{(\alpha+k)-1}(1-p)^{(\beta+n-k)-1} $$
+
+Since $\pi(p~|~X=k)$ is still a continuous function, the \textbf{only} continuous probability distribution that follows the form of $p^{\text{some power}-1}(1-p)^{\text{another power}-1}$ is the Beta distribution. So we argue that $\pi(p~|~X=k)$ has to be another Beta distribution. \\
+
+Mirroring the form of Beta distribution, we can see that the new hyperparameters for $\pi(p~|~X)$ is 
+$$ \alpha^* = \alpha + k,\qquad \qquad \beta^* = \beta + n -k $$
+And the constants that we have ignored from our calculation must give us
+$$ \frac{\dsst \binom{n}{k}\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}}{\dsst \int_0^1 \left[\binom{n}{k}p^k(1-p)^{n-k}\right]\times \left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}p^{\alpha-1}(1-p)^{\beta}\right]\, dp} = \frac{\Gamma(\alpha^*+\beta^*)}{\Gamma(\alpha^*)\Gamma(\beta^*)}= \frac{\Gamma((\alpha+k)+(\beta+n-k))}{\Gamma(\alpha+k)\Gamma(\beta+n-k)} $$
+
+This looks like magic, but it is indeed how it works. 
+
+\subsection{Summary}
+
+The whole process tells us
+$$ \textsf{Beta}(\alpha, \beta) \xrightarrow{\text{Binomial distribution, $k$ successes out of $n$ trials}} \textsf{Beta}(\alpha+k, \beta+n-k) $$
+
+\subsection{Effective Sample Size}
+
+We can also compare the change of the mean between the two Beta distributions (the prior, and the posterior):
+\begin{align*}
+\text{posterior mean} = \frac{\alpha^*}{\alpha^*+\beta^*} = &  \frac{\alpha+k}{(\alpha+k)+(\beta+n-k)}=\frac{\alpha+k}{\alpha+\beta+n} = \frac{\alpha}{\alpha+\beta+n} + \frac{k}{\alpha+\beta+n}\\
+& \\
+= & \frac{\alpha+\beta}{\alpha+\beta+n}\cdot \frac{\alpha}{\alpha+\beta} + \frac{n}{\alpha+\beta+n}\cdot \frac{k}{n}
+\end{align*}
+
+
+We see that we can split the mean of the posterior distribution into a sum of two products. We can recognize that 
+$$ \frac{\alpha}{\alpha+\beta}:\quad \text{mean of the prior},\qquad \qquad \frac{k}{n}:\quad \text{mean of the observed data}$$
+We would like to interpret this sum as a weighted sum of the two means, with weights $\dsst \frac{\alpha+\beta}{\alpha+\beta+n}$ and $\dsst \frac{n}{\alpha+\beta+n}$. Intuitively, we define
+\begin{itemize}
+	\item Effective sample size of $\textsf{Beta}(\alpha, \beta)$ as $\alpha + \beta$.
+\end{itemize}
+
+The we can interpret the mean of the posterior as follow:
+$$\underbrace{\frac{\alpha^*}{\alpha^*+\beta^*}}_\text{posterior mean} = \underbrace{\left(\frac{\overbrace{\alpha+\beta}^\text{prior effective sample size}}{\underbrace{\alpha+\beta+n}_\text{posterior effective sample size}}\right)}_\text{prior weight}\cdot \underbrace{\frac{\alpha}{\alpha+\beta}}_\text{prior mean}+ \underbrace{\left(\frac{\overbrace{n}^\text{data size}}{\underbrace{\alpha+\beta+n}_\text{posterior effective sample size}}\right)}_\text{data weight}\cdot \underbrace{\frac{k}{n}}_\text{data mean} $$
+
+\subsection{Effect of Stronger Prior}
+
+Consider when we impose 2 different Beta priors, $\textsf{Beta}(1, 1)$ and $\textsf{Beta}(100, 100)$. They share the same prior mean $\dsst \frac{1}{2}=\frac{100}{200}$. With the same amount of data (size $n$), compare that
+$$ \textsf{Beta}(1,1): \quad \text{prior weight }= \frac{2}{2+n},\qquad \qquad \text{vs} \qquad \qquad \textsf{Beta}(100, 100):\quad \text{prior weight }= \frac{200}{200+n} $$
+
+Since $\dsst \frac{200}{200+n}$ is closer to 1, the mean of the posterior $\dsst \frac{\alpha^*}{\alpha^*+\beta^*}$ is closer to the mean of the prior $\dsst \frac{1}{2}$. This means \textbf{stronger} the prior we have, the less we will shift away from our original beliefs.
+
+\section{Gamma-Poisson Conjugacy}
+
+With the detailed discussion in the previous Beta-Binomial Conjugacy, we can derive the Gamma-Poisson Conjugacy in a similar way.
+
+\subsection{Definitions}
+
+\textbf{Note:} Gamma distribution can have 2 different definitions.
+
+\begin{itemize}
+\item Gamma distribution: 
+\begin{itemize}
+\item Definition 1 (used in video): $ \dsst p(\lambda) = \frac{1}{\Gamma(k)\theta^k}\lambda^{k-1}e^{-\lambda/\theta}$. Here hyperparameters are $k$ and $\theta$.
+
+\item Definition 2 (used in lab): $ \dsst p(\lambda) = \frac{\beta^\alpha}{\Gamma(\alpha)}\lambda^{\alpha-1}e^{-\beta\lambda} $. Here hyperparameters are $\alpha$ and $\beta$.
+
+\item Relationship between the 2 definitions: $\alpha=k$ while $\beta = \dsst \frac{1}{\theta}$.
+
+\item Statistics: mean $= k\theta = \dsst \frac{\alpha}{\beta}$, and variance $= k\theta^2 = \dsst \frac{\alpha}{\beta^2} $.
+\end{itemize}
+\item Poisson distribution: $\dsst \mathbb{P}(X = x_i~|~\lambda) = \frac{\lambda^{x_i}}{(x_i)!}e^{-\lambda} $. Here, $x_i$ denotes the count \textbf{within 1 time period}.\\
+\end{itemize}
+
+Using Bayes' Rule, we get:\\
+
+Version 1 with $k$ and $\theta$, over 1 time period:
+$$ p(\lambda~|~X=x_i) \propto \mathbb{P}(X=x_i~|~\lambda)\times \pi(\lambda) \propto \left[\lambda^{x_i}e^{-\lambda}\right]\times\left[\lambda^{k-1}e^{-\lambda/\theta}\right]=\lambda^{x_i+k-1}e^{-(1+1/\theta)\lambda} $$ 
+
+Version 2 with $\alpha$ and $\beta$, over 1 time period:
+$$ p(\lambda~|~X=x_i) \propto \mathbb{P}(X=x_i~|~\lambda)\times \pi(\lambda) \propto \left[\lambda^{x_i}e^{-\lambda}\right]\times\left[\lambda^{\alpha-1}e^{-\beta\lambda}\right]=\lambda^{x_i+\alpha-1}e^{-(1+\beta)\lambda} $$
+
+Since the only continuous probability distribution sharing the form $\lambda^{\text{some power}-1}e^{-(some constant)\times \lambda}$ is the Gamma distribution. We conclude that $p(\lambda~|~X=x_i)$ must also be the Gamma distribution.
+
+\subsection{Summary}
+
+Version 1 notation:
+
+$$ \textsf{Gamma}(k, \theta)\xrightarrow{\text{Poisson distribution, $x_i$ count within 1 period}} \textsf{Gamma}\left(x_i+k,\ 1/(1+\frac{1}{\theta})=\frac{\theta}{\theta+1}\right) $$
+
+or Version 2 notation:
+
+$$ \textsf{Gamma}(\alpha, \beta)\xrightarrow{\text{Poisson distribution, $x_i$ count within 1 period}} \textsf{Gamma}(x_i+\alpha,\ 1+\beta) $$
+
+\subsubsection*{After sequentially updating over $n$ time periods}
+
+Version 1 notation:
+$$ \textsf{Gamma}(k, \theta)\xrightarrow{\text{Poisson distribution, $\sum x_i$ total counts within $n$ period}} \textsf{Gamma}\left(\sum x_i+k,\ 1/(n+\frac{1}{\theta})=\frac{\theta}{n\theta +1}\right) $$
+
+Version 2 notation:
+
+$$ \textsf{Gamma}(\alpha, \beta)\xrightarrow{\text{Poisson distribution, $\sum x_i$ total counts within $n$ period}} \textsf{Gamma}\left(\sum x_i+\alpha,\ n+\beta\right) $$
+
+\subsection{Effective Sample Size and Analysis of Posterior Mean}
+
+Here we use the $\textsf{Gamma}(\alpha, \beta)$ version to illustrate the idea.
+\begin{itemize}
+	\item Effective sample size of $\textsf{Gamma}(\alpha, \beta)$ is $\beta$.
+\end{itemize}
+
+ After updating the distribution, we have
+\begin{align*}
+\text{posterior mean} = & \frac{\alpha^*}{\beta^*}= \frac{\alpha+\sum x_i}{\beta+n} \\
+& \\
+= & \underbrace{\left(\frac{\overbrace{\beta}^\text{prior effective sample size}}{\underbrace{\beta+n}_\text{posterior effective sample size}}\right)}_\text{prior weight}\cdot \underbrace{\frac{\alpha}{\beta}}_\text{prior mean} + \underbrace{\left(\frac{\overbrace{n}^\text{data size}}{\underbrace{\beta+n}_\text{posterior effective sample size}}\right)}_\text{data weight}\cdot \underbrace{\frac{\sum x_i}{n}}_\text{data mean}
+\end{align*} 
+
+When the prior effective sample size $\beta$ is larger, the posterior mean will be closer to the prior mean, and it will take more time period $n$ to change our prior beliefs.
+
+\section{Normal-Normal Conjugacy}
+
+\textbf{IMPORTANT:} This conjugacy only works under the assumption that the data variance $\sigma^2$ is \textbf{known}. So the only parameter we are interested is the \textbf{data mean} $\mu$. In Week 3, we will encounter another conjugate family, the \textbf{Inverse Gamma-Normal Conjugacy}, which deals with unknown data variance.
+
+\subsection{Definitions}
+
+\begin{itemize}
+	\item Normal distribution for \textbf{prior}: $p(\mu) = \dsst \textsf{N}(\nu, \tau^2)=\frac{1}{\tau\sqrt{2\pi}}e^{-(\mu-\nu)^2/(2\tau^2)}$. Hyperparameters are $\nu, \tau^2$.
+	
+	\item Normal distribution for 1 piece of \textbf{data} with \textbf{known} $\sigma^2$: $p(x_i~|~\mu) = \dsst \textsf{N}(\mu, \sigma^2)=\frac{1}{\sigma\sqrt{2\pi}}e^{-(x_i-\mu)^2/(2\sigma^2)}$
+\end{itemize}
+
+Using Bayes' Rule, we have
+\begin{align*}
+p(\mu~|~x_i) \propto p(x~|~\mu)\times p(\mu) \propto & \left[e^{-\dsst\frac{(x_i-\mu)^2}{2\sigma^2}}\right]\times \left[e^{-\dsst \frac{(\mu-\nu)^2}{2\tau^2}}\right]\\
+& \\
+= & \exp\left\{-\dsst \frac{1}{2}\dsst \frac{(\mu-\frac{\nu\sigma^2+x_i\tau^2}{\tau^2+\sigma^2})^2}{\frac{\sigma^2\tau^2}{\sigma^2+\tau^2}}+(1-\frac{1}{\sigma^2+\tau^2})(\sigma^2\nu^2+(x_i)^2\tau^2)\right\}\propto \exp\left\{-\frac{1}{2}\dsst \frac{(\mu-\nu^*)^2}{(\tau^*)^2}\right\}
+\end{align*} 
+where the new hyperparameters $\nu^*$ and $(\tau^*)^2$ are
+$$ \nu^* = \frac{\nu\sigma^2+x_i\tau^2}{\sigma^2+\tau^2},\qquad \qquad (\tau^*)^2 = \frac{\sigma^2\tau^2}{\sigma^2+\tau^2} $$
+
+
+(In the above derivation, we use the fact that $x_i$, $\nu$, $\sigma^2$, and $\tau^2$ are known once we have set our prior. Therefore, $\dsst \exp\left\{(1-\frac{1}{\sigma^2+\tau^2})(\nu^2\sigma^2+(x_i)^2\tau^2) \right\}$ is also a constant.)\\
+
+If we have observed a set of data $\{x_1, x_2,\cdots,x_n \}$, using \textbf{sequential update}, we have
+$$ \nu^* = \frac{\nu\sigma^2+\left(\sum x_i\right)\tau^2}{\sigma^2+n\tau^2},\qquad \qquad (\tau^*)^2 = \frac{\sigma^2\tau^2}{\sigma^2+n\tau^2} $$
+
+\subsection{Summary}
+
+After observing a set of $n$ data points $\{x_1, x_2, \cdots, x_n\}$ with the same \textbf{known} variance $\sigma^2$, we can update the distribution of the mean $\mu$:
+
+$$ \textsf{N}(\nu, \tau)\xrightarrow{\text{Normal distribution, $n$ data points $\{x_1, \cdots, x_n\}$}} \textsf{N}\left(\frac{\nu\sigma^2+n\bar{x}\tau^2}{\sigma^2+n\tau^2},\ \frac{\sigma^2\tau^2}{\sigma^2+n\tau^2}\right), $$
+where $\bar{x}$ is the sample mean of the data.
+
+\subsection{Effective Sample Size}
+
+\begin{itemize}
+	\item Effective sample size of $\textsf{N}(\nu, \tau^2)$ under the \textbf{Normal-Normal Conjugacy} is $\dsst \frac{\sigma^2}{\tau^2}$.
+\end{itemize}
+
+To see this, we need to manipulate the formula of the posterior mean
+\begin{align*}
+\text{posterior mean }=\nu^* = & \frac{\nu\sigma^2+(\sum x_i)\tau^2}{\sigma^2+n\tau^2} = \frac{\nu\sigma^2}{\sigma^2+n\tau^2} + \frac{\left(\sum x_i\right)\tau^2}{\sigma^2+n\tau^2}\\
+& \\
+ = & \frac{\sigma^2}{\sigma^2+n\tau^2}\cdot \nu + \frac{n\tau^2}{\sigma^2+n\tau^2}\cdot \frac{\sum x_i}{n} \\
+& \\
+= & \underbrace{\left(\frac{\overbrace{\frac{\sigma^2}{\tau^2}}^\text{prior effective sample size}}{\underbrace{\frac{\sigma^2}{\tau^2}+n}_\text{posterior effective sample size}}\right)}_\text{prior weight}\cdot \underbrace{\nu}_\text{prior mean} + \underbrace{\left(\frac{\overbrace{n}^\text{data size}}{\underbrace{\frac{\sigma^2}{\tau^2}+n}_\text{posterior effective sample size}}\right)}_\text{data weight}\cdot \underbrace{\frac{\sum x_i}{n}}_\text{data mean}
+\end{align*}
+
+In the Normal-Normal Conjugacy, it turns out that for a fixed data variance $\sigma^2$, the \textbf{smaller} $\tau^2$ is, the \textbf{larger} the prior effective sample size is. This makes sense because the variance $\tau^2$ represents our prior belief of the \textbf{spread} of the prior data. The less variance of our belief in the prior data, the more centered the prior will be, then the stronger we trust our prior.
+
+\end{document}
