@@ -203,7 +203,7 @@ The \textcolor{blue}{$p$-value} is defined to be, **given the null hypothesis is
 
 $$ p-\text{value} = P(\text{something or more extreme cases happen}~|~H_0\text{ is true}).$$
 
-We also set a significance level $\alpha$. We say, if $p$-value is larger than $\alpha$, we fail to reject the null hypothesis. On the other hand, if $p$-value is smaller than $\alpha$, we reject the null hypothesis and accept the alternative hypothesis. $\alpha$ also gives the rate of Type I error, that is, we reject the null hypothesis when the null-hypothesis is true (known as a "false negative" finding).
+We also set a significance level $\alpha$. We say, if $p$-value is larger than $\alpha$, we fail to reject the null hypothesis. On the other hand, if $p$-value is smaller than $\alpha$, we reject the null hypothesis and accept the alternative hypothesis. $\alpha$ also gives the rate of Type I error, that is, we reject the null hypothesis when the null-hypothesis is true (known as a "false positive" finding).
 
 However, $p$-value **does not provide the probability that $H_0$ is true**. Because of this fact, we **cannot** interpret a 95% confidence interval to be the probability of a parameter falling within this interval is 95%.
 
